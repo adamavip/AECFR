@@ -16,6 +16,7 @@ library(skimr)
 library(gtsummary)
 library(inspectdf)
 library(sf)
+library(WRS2) # 2way robust ANOVA
 ```
 
 ## Import data
@@ -36,6 +37,8 @@ df<- df %>% rename_with(
 # Convert to numeric
 df <- df %>% mutate(across(c("GYld_Kgpha","all_tr1","recNP_tr8"),
                            as.numeric))
+# Remove NA values in the yield
+df<- df %>% drop_na(GYld_Kgpha)
 ```
 
 ## Inspect data
@@ -110,7 +113,7 @@ tm_shape(maize_areas)+
 
 * Yield boxplots
 ```{r}
-df %>% drop_na(GYld_Kgpha) %>% 
+df %>% 
   ggplot(aes(factor(Treat),GYld_Kgpha, fill=factor(Treat)))+
   geom_boxplot() +
   stat_summary(fun = mean, geom = "point", shape = 21, size = 2, color = "white",fill="blue")+
@@ -122,22 +125,6 @@ df %>% drop_na(GYld_Kgpha) %>%
   labs(y="Grain Yield (kg/ha)",x="Treatments")
 ```
 
-* Explore yield differences with recNP
-```{r}
-all<-df %>% group_by(District,Treat) %>%
-summarise(mean_diff_all=mean(diff_all,na.rm = T)) %>% drop_na() #%>%
-#mutate(mean_diff_all=mean_diff_all * (-1))
-
-```
-```{r}
-all %>%
-ggplot(aes(x=mean_diff_all,y=District,fill=factor(Treat))) +
-geom_col()+
-geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
-theme_bw()+
-  labs(x="Contribution to av. all yield (%)",y="District")
-
-```
 
 ## Analysis of Variance (ANOVA)
 
@@ -148,10 +135,220 @@ bartlett.test(GYld_Kgpha ~ Treat, data = df)
 ```
 p<0.05 so we can accept the alternative hypothesis which stipulate there are significant differences of variances accross treatments.
 
-* Robust ANOVA
+* Is there statistical significant differences of yield medians accross regions and districts?
 ```{r}
+# Convert string to factor
+df<- df %>% mutate_if(is.character,as.factor)
+# Two-way analysis of variance for M-estimators
+#pbad2way(GYld_Kgpha ~ Region * District,
+         # data = df,
+         # est = "mom",    # modified M-estimator
+         # nboot = 5000)
+# pbad2way doesn't work because of the incomplete nature of the design
+
+#create an interaction variable
+df["Region.District"] = interaction(df$Region,df$District)
 # Perform robust ANOVA using Welch's test
-welch_result <- oneway.test(GYld_Kgpha ~ Treat, data = df, var.equal = FALSE)
-print(welch_result)
+oneway.test(GYld_Kgpha ~ Region.District, data = df, var.equal = FALSE)
 ```
-p of the treatment is statistically significant (p < 0.05), it is likely that treatment type does have a significant effect on average crop yield. In fact there is statistically-significant difference in average crop yield according to treatment.
+
+## Exploration yield penality 
+```{r}
+# Recode Treatment
+df$Treat<- factor(df$Treat)
+df<-df %>% mutate(Treat=case_when(
+  Treat=="1" ~ "All",
+  Treat=="2" ~ "All-B",
+  Treat=="3" ~ "All-Zn",
+  Treat=="4" ~ "All-S",
+  Treat=="5" ~ "All-K",
+  Treat=="6" ~ "All-P",
+  Treat=="7" ~ "All-N",
+  Treat=="8" ~ "All-KSZnB",
+  Treat=="9" ~ "Control",
+  Treat=="10" ~ "recNP+S2",
+))
+```
+### Yield differences with all
+* Per region
+```{r message=TRUE, warning=FALSE}
+all_reg<-df %>% group_by(Region,Treat) %>%
+summarise(mean_diff_all=mean(diff_all,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_all=mean_diff_all * (-1))
+
+```
+```{r}
+p_reg<- all_reg %>%
+ggplot(aes(x=mean_diff_all,y=Region,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. all yield (%)",y="Region")
+p_reg
+ggsave(p_reg, file="output/maize/yield_diff_all_region.png", width = 6, height = 4, dpi = 300)
+```
+* Per district
+```{r message=TRUE, warning=FALSE}
+all_dist<-df %>% group_by(District,Treat) %>%
+summarise(mean_diff_all=mean(diff_all,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_all=mean_diff_all * (-1))
+
+```
+```{r}
+p_dist<- all_dist %>%
+ggplot(aes(x=mean_diff_all,y=District,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. all yield (%)",y="District")
+p_dist
+ggsave(p_dist, file="output/maize/yield_diff_all_district.png", width = 6, height = 4, dpi = 300)
+```
+* Per zone
+```{r message=TRUE, warning=FALSE}
+all_zon<-df %>% group_by(Zone,Treat) %>%
+summarise(mean_diff_all=mean(diff_all,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_all=mean_diff_all * (-1))
+
+```
+```{r}
+p_zon<- all_zon %>%
+ggplot(aes(x=mean_diff_all,y=Zone,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. all yield (%)",y="Zone")
+p_zon
+ggsave(p_zon, file="output/maize/yield_diff_all_zone.png", width = 6, height = 4, dpi = 300)
+```
+
+* Per region and district
+```{r message=TRUE, warning=FALSE}
+all_reg_dist<-df %>% group_by(Region,District,Treat) %>%
+summarise(mean_diff_all=mean(diff_all,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_all=mean_diff_all * (-1))
+
+```
+```{r}
+p_reg_dist<- all_reg_dist %>%
+ggplot(aes(x=mean_diff_all,y=District,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. all yield (%)",y="District")+
+  facet_wrap(~Region)
+p_reg_dist
+ggsave(p_reg_dist, file="output/maize/yield_diff_all_reg_district.png", width = 8, height = 6, dpi = 300)
+```
+
+* Per district per moisture domain
+```{r message=TRUE, warning=FALSE}
+all_dist_MD<-df %>% group_by(MD,District,Treat) %>%
+summarise(mean_diff_all=mean(diff_all,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_all=mean_diff_all * (-1))
+
+```
+```{r}
+p_dist_MD<- all_dist_MD %>%
+ggplot(aes(x=mean_diff_all,y=District,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. all yield (%)",y="District")+
+  facet_wrap(~MD)
+p_dist_MD
+ggsave(p_dist_MD, file="output/maize/yield_diff_all_district.png", width = 6, height = 4, dpi = 300)
+```
+
+
+
+### Yield differences with recNP
+* Per region
+```{r message=TRUE, warning=FALSE}
+recNP_reg<-df %>% group_by(Region,Treat) %>%
+summarise(mean_diff_recNP=mean(diff_recNP,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_recNP=mean_diff_recNP * (-1))
+
+```
+```{r}
+p_reg<- recNP_reg %>%
+ggplot(aes(x=mean_diff_recNP,y=Region,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. recNP yield (%)",y="Region")
+p_reg
+ggsave(p_reg, file="output/maize/yield_diff_recNP_region.png", width = 6, height = 4, dpi = 300)
+```
+* Per district
+```{r message=TRUE, warning=FALSE}
+recNP_dist<-df %>% group_by(District,Treat) %>%
+summarise(mean_diff_recNP=mean(diff_recNP,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_recNP=mean_diff_recNP * (-1))
+
+```
+```{r}
+p_dist<- recNP_dist %>%
+ggplot(aes(x=mean_diff_recNP,y=District,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. recNP yield (%)",y="District")
+p_dist
+ggsave(p_dist, file="output/maize/yield_diff_recNP_district.png", width = 6, height = 4, dpi = 300)
+```
+* Per zone
+```{r message=TRUE, warning=FALSE}
+recNP_zon<-df %>% group_by(Zone,Treat) %>%
+summarise(mean_diff_recNP=mean(diff_recNP,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_recNP=mean_diff_recNP * (-1))
+
+```
+```{r}
+p_zon<- recNP_zon %>%
+ggplot(aes(x=mean_diff_recNP,y=Zone,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. recNP yield (%)",y="Zone")
+p_zon
+ggsave(p_zon, file="output/maize/yield_diff_recNP_zone.png", width = 6, height = 4, dpi = 300)
+```
+
+* Per region and district
+```{r message=TRUE, warning=FALSE}
+recNP_reg_dist<-df %>% group_by(Region,District,Treat) %>%
+summarise(mean_diff_recNP=mean(diff_recNP,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_recNP=mean_diff_recNP * (-1))
+
+```
+```{r}
+p_reg_dist<- recNP_reg_dist %>%
+ggplot(aes(x=mean_diff_recNP,y=District,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. recNP yield (%)",y="District")+
+  facet_wrap(~Region)
+p_reg_dist
+ggsave(p_reg_dist, file="output/maize/yield_diff_recNP_reg_district.png", width = 8, height = 6, dpi = 300)
+```
+
+* Per district per moisture domain
+```{r message=TRUE, warning=FALSE}
+recNP_dist_MD<-df %>% group_by(MD,District,Treat) %>%
+summarise(mean_diff_recNP=mean(diff_recNP,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_recNP=mean_diff_recNP * (-1))
+
+```
+```{r}
+p_dist_MD<- recNP_dist_MD %>%
+ggplot(aes(x=mean_diff_recNP,y=District,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. recNP yield (%)",y="District")+
+  facet_wrap(~MD)
+p_dist_MD
+ggsave(p_dist_MD, file="output/maize/yield_diff_recNP_district.png", width = 6, height = 4, dpi = 300)
+```
