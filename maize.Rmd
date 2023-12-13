@@ -1,0 +1,157 @@
+---
+title: "Maize"
+author: "Adama NDOUR"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Import libraries
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(skimr)
+library(gtsummary)
+library(inspectdf)
+library(sf)
+```
+
+## Import data
+```{r}
+df<- readxl::read_excel("input/maize.xls",sheet = "MaizeDec7-2023_final_no_IFDC")
+```
+
+## Overview of the data
+```{r}
+str(df)
+```
+## Data manipulation
+```{r}
+# Rename some variables
+df<- df %>% rename_with(
+   ~ c("all_tr1","recNP_tr8","diff_all","diff_recNP"),.cols= c("All (Trt1)","RecNP (Trt8)", "Yld. diff-All (%)", "Yld. diff-RecNP (%)"))
+
+# Convert to numeric
+df <- df %>% mutate(across(c("GYld_Kgpha","all_tr1","recNP_tr8"),
+                           as.numeric))
+```
+
+## Inspect data
+* Categorical variables
+```{r}
+df %>% select_if(is.character) %>% skim()
+```
+```{r}
+df %>% inspect_cat()
+```
+
+
+```{r}
+# numeric variables
+df %>% select_if(is.numeric) %>% skim() %>% 
+  knitr::kable()
+```
+
+
+## Descriptive statistics
+* Yield per treatment
+```{r message=FALSE, warning=FALSE}
+df %>% select(c("Treat","GYld_Kgpha")) %>% 
+  tbl_summary(
+    by = Treat,
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} / {N} ({p}%)"
+    ),
+    digits = all_continuous() ~ 2,
+    missing_text = "(Missing)"
+  ) %>% modify_spanning_header(all_stat_cols() ~ "**Treatments**") 
+```
+
+## Explory data analysis
+* Map
+```{r}
+maize_areas<- st_as_sf(df %>% select(c("Lat_DD","Long_DD",
+                                      "Treat","GYld_Kgpha","Region")) %>% drop_na() %>% filter(GYld_Kgpha>0,Treat==9),
+                        coords=c("Long_DD","Lat_DD"), crs=4326)
+
+
+# Loxgb Ethiopia shapefile
+Eth <- sf::st_read("input/eth_adm_2021_shp", layer = "eth_admbnda_adm0_csa_bofedb_itos_2021", quiet = TRUE) %>%
+  st_transform(4326)
+Eth_regions<- sf::st_read("input/eth_adm_2021_shp", layer = "eth_admbnda_adm1_csa_bofedb_2021", quiet = TRUE) %>%
+  st_transform(4326)
+
+p<-ggplot() +
+  geom_sf(data = Eth, fill = NA, color = "black") +
+  geom_sf(data = Eth_regions, fill = NA, color = "darkgrey")+
+  #geom_sf_label(data = Eth_regions,aes(label=ADM1_EN))+
+   geom_sf(data=maize_areas,aes(color=Region,size=GYld_Kgpha), na.rm=T) +
+  coord_sf()+
+  theme_bw()
+ggsave(p, file="output/Eth_maize_yield_map.png", width = 6, height = 4, dpi = 300)
+p
+```
+```{r}
+library(tmap)
+library(tmaptools)
+# Set tmap to view mode
+tmap_mode("view")
+tm_shape(Eth)+
+  tm_borders(col = "black") +
+tm_shape(Eth_regions) +
+  tm_borders(col = "gray")
+tm_shape(maize_areas)+
+  tm_dots(col = "GYld_Kgpha") +
+  tm_mouse_coordinates()
+```
+
+* Yield boxplots
+```{r}
+df %>% drop_na(GYld_Kgpha) %>% 
+  ggplot(aes(factor(Treat),GYld_Kgpha, fill=factor(Treat)))+
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 2, color = "white",fill="blue")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), 
+        axis.title.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        legend.position = 'none') +
+  labs(y="Grain Yield (kg/ha)",x="Treatments")
+```
+
+* Explore yield differences with recNP
+```{r}
+all<-df %>% group_by(District,Treat) %>%
+summarise(mean_diff_all=mean(diff_all,na.rm = T)) %>% drop_na() #%>%
+#mutate(mean_diff_all=mean_diff_all * (-1))
+
+```
+```{r}
+all %>%
+ggplot(aes(x=mean_diff_all,y=District,fill=factor(Treat))) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. all yield (%)",y="District")
+
+```
+
+## Analysis of Variance (ANOVA)
+
+Let's check the assumption
+```{r}
+# Homogeinty of variance
+bartlett.test(GYld_Kgpha ~ Treat, data = df)
+```
+p<0.05 so we can accept the alternative hypothesis which stipulate there are significant differences of variances accross treatments.
+
+* Robust ANOVA
+```{r}
+# Perform robust ANOVA using Welch's test
+welch_result <- oneway.test(GYld_Kgpha ~ Treat, data = df, var.equal = FALSE)
+print(welch_result)
+```
+p of the treatment is statistically significant (p < 0.05), it is likely that treatment type does have a significant effect on average crop yield. In fact there is statistically-significant difference in average crop yield according to treatment.
