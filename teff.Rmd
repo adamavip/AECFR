@@ -20,7 +20,7 @@ library(sf)
 
 ## Import data
 ```{r}
-df<- readxl::read_excel("input/maize.xls",sheet = "MaizeDec7-2023_final_no_IFDC")
+df<- readxl::read_excel("input/Teff_ADAMA.xlsx",sheet = "Sheet1")
 ```
 
 ## Overview of the data
@@ -28,14 +28,23 @@ df<- readxl::read_excel("input/maize.xls",sheet = "MaizeDec7-2023_final_no_IFDC"
 str(df)
 ```
 ## Data manipulation
-```{r}
+```{r warning=FALSE}
 # Rename some variables
 df<- df %>% rename_with(
-   ~ c("all_tr1","recNP_tr8","diff_all","diff_recNP"),.cols= c("All (Trt1)","RecNP (Trt8)", "Yld. diff-All (%)", "Yld. diff-RecNP (%)"))
+   ~ c("Gyld_kgha","recNP_diff","all_diff","soil_type"),.cols= c("Gyld","(RN-trt)/RNP*100", "MYD (All-trt)/All)*100",
+  "Soil type-COW"))
 
 # Convert to numeric
-df <- df %>% mutate(across(c("GYld_Kgpha","all_tr1","recNP_tr8"),
-                           as.numeric))
+df <- df %>% mutate(across(c("Gyld_kgha","recNP_diff","all_diff"),as.numeric))
+
+# Convert string to factor
+df<- df %>% mutate_if(is.character,as.factor)
+
+#Remove NA values for yield and soil type
+df<- df %>% 
+  #drop_na(soil_type) %>% 
+  drop_na(Gyld_kgha)
+
 ```
 
 ## Inspect data
@@ -45,6 +54,12 @@ df %>% select_if(is.character) %>% skim()
 ```
 ```{r}
 df %>% inspect_cat()
+```
+
+```{r}
+# Replace NA values in STP
+#df %>% mutate(STP=str_replace_na("vertisols")) %>% #filter(ID=="DZ-EAIR_2") %>% view()
+df<-df %>% mutate(STP=str_replace_na("vertisols"))
 ```
 
 
@@ -58,7 +73,7 @@ df %>% select_if(is.numeric) %>% skim() %>%
 ## Descriptive statistics
 * Yield per treatment
 ```{r message=FALSE, warning=FALSE}
-df %>% select(c("Treat","GYld_Kgpha")) %>% 
+df %>% select(c("Treat","Gyld_kgha")) %>% 
   tbl_summary(
     by = Treat,
     statistic = list(
@@ -66,8 +81,8 @@ df %>% select(c("Treat","GYld_Kgpha")) %>%
       all_categorical() ~ "{n} / {N} ({p}%)"
     ),
     digits = all_continuous() ~ 2,
-    missing_text = "(Missing)"
-  ) %>% modify_spanning_header(all_stat_cols() ~ "**Treatments**") 
+    missing_text = "Missing"
+  ) %>% modify_spanning_header(all_stat_cols() ~ "**Treatments**") %>% add_p()
 ```
 
 ## Explory data analysis
@@ -110,8 +125,8 @@ tm_shape(maize_areas)+
 
 * Yield boxplots
 ```{r}
-df %>% drop_na(GYld_Kgpha) %>% 
-  ggplot(aes(factor(Treat),GYld_Kgpha, fill=factor(Treat)))+
+df %>% drop_na(Gyld_kgha) %>% 
+  ggplot(aes(factor(Treat),Gyld_kgha, fill=factor(Treat)))+
   geom_boxplot() +
   stat_summary(fun = mean, geom = "point", shape = 21, size = 2, color = "white",fill="blue")+
   theme_bw() +
@@ -121,20 +136,177 @@ df %>% drop_na(GYld_Kgpha) %>%
         legend.position = 'none') +
   labs(y="Grain Yield (kg/ha)",x="Treatments")
 ```
-
 ## Analysis of Variance (ANOVA)
 
 Let's check the assumption
 ```{r}
 # Homogeinty of variance
-bartlett.test(GYld_Kgpha ~ Treat, data = df)
+bartlett.test(Gyld_kgha ~ Treat, data = df)
 ```
 p<0.05 so we can accept the alternative hypothesis which stipulate there are significant differences of variances accross treatments.
 
-* Robust ANOVA
+* Is there statistical significant differences of yield medians accross regions and Regions?
 ```{r}
+
 # Perform robust ANOVA using Welch's test
-welch_result <- oneway.test(GYld_Kgpha ~ Treat, data = df, var.equal = FALSE)
-print(welch_result)
+oneway.test(Gyld_kgha ~ Region, data = df, var.equal = FALSE)
 ```
-p of the treatment is statistically significant (p < 0.05), it is likely that treatment type does have a significant effect on average crop yield. In fact there is statistically-significant difference in average crop yield according to treatment.
+```{r}
+# mean differences accross regions and soil type?
+df["Region.Soil"]=interaction(df$Region,df$soil_type)
+oneway.test(Gyld_kgha ~ Region.Soil, data = df, var.equal = FALSE)
+```
+## Exploration yield penality 
+```{r}
+# Recode Treatment
+df$Treat<- factor(df$Treat)
+df<-df %>% mutate(Treat=case_when(
+  Treat=="1" ~ "All",
+  Treat=="2" ~ "All-B",
+  Treat=="3" ~ "All-Zn",
+  Treat=="4" ~ "All-S",
+  Treat=="5" ~ "All-K",
+  Treat=="6" ~ "All-P",
+  Treat=="7" ~ "All-N",
+  Treat=="8" ~ "All-KSZnB",
+  Treat=="9" ~ "Control",
+  Treat=="10" ~ "recNP+S2",
+))
+
+# Replace all values for treat1 by 0 in all_diff
+#ids<- df %>% filter(Treat==1) %>% pull(ID) %>% unique()
+df<-df %>% mutate(all_diff=case_when(
+  Treat==1 ~ 0,
+  TRUE ~ all_diff
+))
+
+# Replace all values for treat8 by 0 in all_recNP
+#ids<- df %>% filter(Treat==1) %>% pull(ID) %>% unique()
+df<-df %>% mutate(all_diff=case_when(
+  Treat==8 ~ 0,
+  TRUE ~ all_diff
+))
+```
+### Yield differences with all
+* Per region
+```{r message=TRUE, warning=FALSE}
+all_reg<-df %>% group_by(Region,Treat) %>%
+summarise(mean_diff_all=mean(all_diff,na.rm = T)) %>% drop_na() %>%
+mutate(mean_diff_all=mean_diff_all * (-1))
+
+```
+```{r}
+p_reg<- all_reg %>%
+ggplot(aes(x=mean_diff_all,y=Region,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. all yield (%)",y="Region")
+p_reg
+ggsave(p_reg, file="output/teff/yield_diff_all_region.png", width = 6, height = 4, dpi = 300)
+```
+
+
+* Per region and soil type
+```{r}
+#df<- df %>% drop_na(soil_type)
+all_reg_stp<-df %>% group_by(Region,soil_type,Treat) %>%
+summarise(mean_diff_all=mean(all_diff,na.rm = T)) %>% drop_na() %>% mutate(mean_diff_all=mean_diff_all * (-1))
+all_reg_stp
+```
+```{r}
+p_reg_stp<-all_reg_stp %>%
+ggplot(aes(x=mean_diff_all,y=Region,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. all yield (%)",y="Region") +
+  facet_wrap(~soil_type)
+p_reg_stp
+ggsave(p_reg_stp, file="output/teff/yield_diff_all_region_stp.png", width = 8, height = 6, dpi = 300)
+```
+
+
+
+
+* Per region and moisture domain
+```{r}
+#df<- df %>% drop_na(MD)
+all_reg_md<-df %>% group_by(Region,MD,Treat) %>%
+summarise(mean_diff_all=mean(all_diff,na.rm = T)) %>% drop_na() %>% mutate(mean_diff_all=mean_diff_all * (-1))
+all_reg_md
+```
+```{r}
+p_reg_md<-all_reg_md %>%
+ggplot(aes(x=mean_diff_all,y=Region,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. all yield (%)",y="Region") +
+  facet_wrap(~MD)
+p_reg_md
+ggsave(p_reg_md, file="output/teff/yield_diff_all_region_md.png", width = 8, height = 6, dpi = 300)
+```
+
+
+
+### Yield differences with recNP
+* Per region
+```{r message=TRUE, warning=FALSE}
+recNP_reg<-df %>% group_by(Region,Treat) %>%
+summarise(mean_diff_recNP=mean(recNP_diff,na.rm = T)) %>% drop_na() %>%
+mutate(mean_diff_recNP=mean_diff_recNP * (-1))
+recNP_reg
+```
+```{r}
+p_reg<- recNP_reg %>%
+ggplot(aes(x=mean_diff_recNP,y=Region,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. recNP yield (%)",y="Region")
+p_reg
+ggsave(p_reg, file="output/teff/yield_diff_recNP_region.png", width = 6, height = 4, dpi = 300)
+```
+
+
+* Per region and soil type
+```{r}
+df<- df %>% drop_na(soil_type)
+recNP_reg_stp<-df %>% group_by(Region,soil_type,Treat) %>%
+summarise(mean_diff_recNP=mean(recNP_diff,na.rm = T)) %>% drop_na() %>% mutate(mean_diff_recNP=mean_diff_recNP * (-1))
+recNP_reg_stp
+```
+```{r}
+p_reg_stp<-recNP_reg_stp %>%
+ggplot(aes(x=mean_diff_recNP,y=Region,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. recNP yield (%)",y="Region") +
+  facet_wrap(~soil_type)
+p_reg_stp
+ggsave(p_reg_stp, file="output/teff/yield_diff_recNP_region_stp.png", width = 8, height = 6, dpi = 300)
+```
+
+
+
+
+* Per region and moisture domain
+```{r}
+#df<- df %>% drop_na(MD)
+recNP_reg_md<-df %>% group_by(Region,MD,Treat) %>%
+summarise(mean_diff_recNP=mean(recNP_diff,na.rm = T)) %>% drop_na() %>% mutate(mean_diff_recNP=mean_diff_recNP * (-1))
+recNP_reg_md
+```
+```{r}
+p_reg_md<-recNP_reg_md %>%
+ggplot(aes(x=mean_diff_recNP,y=Region,fill=Treat)) +
+geom_col()+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 1)+
+theme_bw()+
+  labs(x="Contribution to av. recNP yield (%)",y="Region") +
+  facet_wrap(~MD)
+p_reg_md
+ggsave(p_reg_md, file="output/teff/yield_diff_recNP_region_md.png", width = 8, height = 6, dpi = 300)
+```
