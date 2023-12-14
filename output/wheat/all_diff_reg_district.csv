@@ -1,0 +1,458 @@
+"Region","District","Trt","mean_diff_all"
+"Amhara","Debere Eliyas","All",0
+"Amhara","Debere Eliyas","All-B",-7.95866130539134
+"Amhara","Debere Eliyas","All-K",-18.7958319428898
+"Amhara","Debere Eliyas","All-KSZnB",-18.926545600271
+"Amhara","Debere Eliyas","All-N",-75.1570455865797
+"Amhara","Debere Eliyas","All-P",-29.9034968209753
+"Amhara","Debere Eliyas","All-S",-6.34855353236772
+"Amhara","Debere Eliyas","All-Zn",-7.74299477235882
+"Amhara","Debere Eliyas","Control",-81.1729011115746
+"Amhara","Debere Eliyas","recNP+S2",-11.1195200898017
+"Amhara","Farta","All",0
+"Amhara","Farta","All-B",2.45137923079188
+"Amhara","Farta","All-K",-10.9892464284611
+"Amhara","Farta","All-KSZnB",-13.9297547369806
+"Amhara","Farta","All-N",-54.2983012218142
+"Amhara","Farta","All-P",-16.7538599734535
+"Amhara","Farta","All-S",0.0708131268863139
+"Amhara","Farta","All-Zn",-0.442041069782676
+"Amhara","Farta","Control",-63.4108171114665
+"Amhara","Farta","recNP+S2",-6.60636064285569
+"Amhara","Gonjkolela","All",0
+"Amhara","Gonjkolela","All-B",3.37904862685083
+"Amhara","Gonjkolela","All-K",-4.90145440698129
+"Amhara","Gonjkolela","All-KSZnB",-16.3884954377083
+"Amhara","Gonjkolela","All-N",-66.4954774607874
+"Amhara","Gonjkolela","All-P",-3.26126047875872
+"Amhara","Gonjkolela","All-S",5.66461314351453
+"Amhara","Gonjkolela","All-Zn",-0.200795517920126
+"Amhara","Gonjkolela","Control",-72.1621499097086
+"Amhara","Gonjkolela","recNP+S2",-3.9783728848289
+"Amhara","Gozamen","All",0
+"Amhara","Gozamen","All-K",-4.5452867923855
+"Amhara","Gozamen","All-KSZnB",3.23385161286867
+"Amhara","Gozamen","Control",-84.4329116897548
+"Amhara","Guna-Begemidir","All",0
+"Amhara","Guna-Begemidir","All-B",-6.03312814309121
+"Amhara","Guna-Begemidir","All-K",-2.71556314687581
+"Amhara","Guna-Begemidir","All-KSZnB",-3.71868184793145
+"Amhara","Guna-Begemidir","All-N",-51.9733863366684
+"Amhara","Guna-Begemidir","All-P",-4.12749863878874
+"Amhara","Guna-Begemidir","All-S",2.55952286142036
+"Amhara","Guna-Begemidir","All-Zn",10.7705208606389
+"Amhara","Guna-Begemidir","Control",-60.3301008284097
+"Amhara","Guna-Begemidir","recNP+S2",6.58352559094403
+"Amhara","Lay Gayint","All",0
+"Amhara","Lay Gayint","All-B",8.68651392497287
+"Amhara","Lay Gayint","All-K",-0.763713812241824
+"Amhara","Lay Gayint","All-KSZnB",-12.3661924460993
+"Amhara","Lay Gayint","All-N",-57.636486095887
+"Amhara","Lay Gayint","All-P",-0.664616952760627
+"Amhara","Lay Gayint","All-S",2.89802029394724
+"Amhara","Lay Gayint","All-Zn",-5.36683886653047
+"Amhara","Lay Gayint","Control",-66.168239146867
+"Amhara","Lay Gayint","recNP+S2",-4.40072936270401
+"Amhara","Machakel","All",0
+"Amhara","Machakel","All-K",4.99179394338448
+"Amhara","Machakel","All-KSZnB",9.86232609582879
+"Amhara","Machakel","Control",-63.2877796720131
+"Amhara","Minjar Shenkora","All",0
+"Amhara","Minjar Shenkora","All-KSZnB",0.485264411784017
+"Amhara","Minjar Shenkora","Control",-55.9182959044725
+"Amhara","Mojana Wodera","All",0
+"Amhara","Mojana Wodera","All-B",-1.04305876221934
+"Amhara","Mojana Wodera","All-K",3.24939845643197
+"Amhara","Mojana Wodera","All-KSZnB",-12.6020863670493
+"Amhara","Mojana Wodera","All-N",-71.7962942011989
+"Amhara","Mojana Wodera","All-P",-35.2848242172085
+"Amhara","Mojana Wodera","All-S",-7.77849961800307
+"Amhara","Mojana Wodera","All-Zn",-11.2276747912329
+"Amhara","Mojana Wodera","Control",-77.4046079567065
+"Amhara","Mojana Wodera","recNP+S2",-2.49743059688358
+"Amhara","Moretina Joru","All",0
+"Amhara","Moretina Joru","All-B",1.20681113591217
+"Amhara","Moretina Joru","All-K",0.214292688270891
+"Amhara","Moretina Joru","All-KSZnB",-2.15430733322995
+"Amhara","Moretina Joru","All-N",-75.8711201914019
+"Amhara","Moretina Joru","All-P",-4.67446256754644
+"Amhara","Moretina Joru","All-S",-7.14023786082054
+"Amhara","Moretina Joru","All-Zn",1.4300873190959
+"Amhara","Moretina Joru","Control",-76.2256933854236
+"Amhara","Moretina Joru","recNP+S2",7.1188398397207
+"Amhara","Wonberma","All",0
+"Amhara","Wonberma","All-B",-1.72325241836795
+"Amhara","Wonberma","All-K",-3.5113387379559
+"Amhara","Wonberma","All-KSZnB",-3.20544598955534
+"Amhara","Wonberma","All-N",-48.9752344979398
+"Amhara","Wonberma","All-P",-1.59922862859341
+"Amhara","Wonberma","All-S",-0.509922111550513
+"Amhara","Wonberma","All-Zn",0.556627274301324
+"Amhara","Wonberma","Control",-58.2371783325049
+"Amhara","Wonberma","recNP+S2",-5.51732395164727
+"Amhara","Yilmana densa","All",0
+"Amhara","Yilmana densa","All-B",0.388335861645036
+"Amhara","Yilmana densa","All-K",-1.24859764743772
+"Amhara","Yilmana densa","All-KSZnB",-15.8012773646075
+"Amhara","Yilmana densa","All-N",-73.827926813746
+"Amhara","Yilmana densa","All-P",-22.4317978649835
+"Amhara","Yilmana densa","All-S",-1.35971138742562
+"Amhara","Yilmana densa","All-Zn",4.65075018907093
+"Amhara","Yilmana densa","Control",-87.7831214597553
+"Amhara","Yilmana densa","recNP+S2",-8.68453432290079
+"Oromia","Adaba","All",0
+"Oromia","Adaba","All-B",-3.55469456126778
+"Oromia","Adaba","All-K",-0.570463549242896
+"Oromia","Adaba","All-KSZnB",2.66185400263861
+"Oromia","Adaba","All-N",-29.0187102944462
+"Oromia","Adaba","All-P",-16.6571140208318
+"Oromia","Adaba","All-S",10.1462000935113
+"Oromia","Adaba","All-Zn",9.43960709965478
+"Oromia","Adaba","Control",-25.889912991037
+"Oromia","Adaba","recNP+S2",3.17175820830521
+"Oromia","Agarfa","All",0
+"Oromia","Agarfa","All-B",16.4892661903603
+"Oromia","Agarfa","All-K",-2.14745011012175
+"Oromia","Agarfa","All-KSZnB",-0.656317589439942
+"Oromia","Agarfa","All-N",-3.37190652629618
+"Oromia","Agarfa","All-P",-18.4828234752985
+"Oromia","Agarfa","All-S",16.6964161484358
+"Oromia","Agarfa","All-Zn",15.4443001357274
+"Oromia","Agarfa","Control",-65.9495629070635
+"Oromia","Agarfa","recNP+S2",-50.3572924027465
+"Oromia","Ambo","All",0
+"Oromia","Ambo","All-K",52.9112526151445
+"Oromia","Ambo","All-KSZnB",30.6444281194941
+"Oromia","Ambo","Control",-66.9294029903051
+"Oromia","Arda Jila mi'o","All",0
+"Oromia","Arda Jila mi'o","All-B",34.5357555786702
+"Oromia","Arda Jila mi'o","All-K",-25.5964800481281
+"Oromia","Arda Jila mi'o","All-KSZnB",18.016220873301
+"Oromia","Arda Jila mi'o","All-N",-32.4543150803264
+"Oromia","Arda Jila mi'o","All-P",-48.0604025997221
+"Oromia","Arda Jila mi'o","All-S",29.2806081749727
+"Oromia","Arda Jila mi'o","All-Zn",-2.47752269862329
+"Oromia","Arda Jila mi'o","Control",-40.4589042361363
+"Oromia","Arda Jila mi'o","recNP+S2",15.9762368079598
+"Oromia","Bora","All",0
+"Oromia","Bora","All-B",-2.88900139605042
+"Oromia","Bora","All-K",-1.7381277564742
+"Oromia","Bora","All-KSZnB",1.10733369458249
+"Oromia","Bora","All-N",-23.2920763820969
+"Oromia","Bora","All-P",9.00723365238532
+"Oromia","Bora","All-S",4.58849926191607
+"Oromia","Bora","All-Zn",-0.913822437910858
+"Oromia","Bora","Control",-29.7723637488691
+"Oromia","Bora","recNP+S2",3.48391011187184
+"Oromia","Chelia","All",0
+"Oromia","Chelia","All-B",-0.211132117832596
+"Oromia","Chelia","All-K",1.76540133838412
+"Oromia","Chelia","All-KSZnB",-10.7411239763077
+"Oromia","Chelia","All-N",-62.9006842911048
+"Oromia","Chelia","All-P",-6.90347347412369
+"Oromia","Chelia","All-S",4.28243013211216
+"Oromia","Chelia","All-Zn",0.0771628928167736
+"Oromia","Chelia","Control",-78.0933902316687
+"Oromia","Chelia","recNP+S2",10.0132385717513
+"Oromia","Chora","All",0
+"Oromia","Chora","All-B",27.5102477925361
+"Oromia","Chora","All-K",16.926342010735
+"Oromia","Chora","All-KSZnB",29.2298474287596
+"Oromia","Chora","All-N",-4.65117038570883
+"Oromia","Chora","All-P",7.32530675526672
+"Oromia","Chora","All-S",15.2925183920815
+"Oromia","Chora","All-Zn",8.88589896695946
+"Oromia","Chora","Control",-43.603026528756
+"Oromia","Chora","recNP+S2",-16.3056704795686
+"Oromia","Degem","All",0
+"Oromia","Degem","All-B",1.9665939557833
+"Oromia","Degem","All-K",-2.40645139319587
+"Oromia","Degem","All-KSZnB",11.8657952299041
+"Oromia","Degem","All-N",-39.0654058281407
+"Oromia","Degem","All-P",2.67814370535511
+"Oromia","Degem","All-S",4.73037224675756
+"Oromia","Degem","All-Zn",3.6131775869036
+"Oromia","Degem","Control",-48.7927714680882
+"Oromia","Degem","recNP+S2",10.5255602312736
+"Oromia","Digelu-Tijo","All",0
+"Oromia","Digelu-Tijo","All-B",-0.908356721886129
+"Oromia","Digelu-Tijo","All-K",3.42670811284359
+"Oromia","Digelu-Tijo","All-KSZnB",1.96904668188104
+"Oromia","Digelu-Tijo","All-N",-27.5418861385411
+"Oromia","Digelu-Tijo","All-P",-13.9160721368408
+"Oromia","Digelu-Tijo","All-S",2.89929057501034
+"Oromia","Digelu-Tijo","All-Zn",2.12731496603952
+"Oromia","Digelu-Tijo","Control",-42.7951156340426
+"Oromia","Digelu-Tijo","recNP+S2",-2.35838845352179
+"Oromia","Dodola","All",0
+"Oromia","Dodola","All-B",9.10882261548478
+"Oromia","Dodola","All-K",-7.33438855992104
+"Oromia","Dodola","All-KSZnB",5.18427477206934
+"Oromia","Dodola","All-N",-11.2885822924003
+"Oromia","Dodola","All-P",-24.4879349817121
+"Oromia","Dodola","All-S",-4.85607374493586
+"Oromia","Dodola","All-Zn",0.293266802658685
+"Oromia","Dodola","Control",-32.4846762816904
+"Oromia","Dodola","recNP+S2",-0.31511803693404
+"Oromia","Dsadi","All",0
+"Oromia","Dsadi","All-B",9.58894221383236
+"Oromia","Dsadi","All-K",4.40352754024022
+"Oromia","Dsadi","All-KSZnB",26.815937246243
+"Oromia","Dsadi","All-N",-16.1696465892785
+"Oromia","Dsadi","All-P",-15.1744352440968
+"Oromia","Dsadi","All-S",5.28814658562477
+"Oromia","Dsadi","All-Zn",-10.4862916646408
+"Oromia","Dsadi","Control",-56.9823675488702
+"Oromia","Dsadi","recNP+S2",10.1792151493376
+"Oromia","Dugda","All",0
+"Oromia","Dugda","All-B",-0.262984487001308
+"Oromia","Dugda","All-K",15.7986149332959
+"Oromia","Dugda","All-KSZnB",25.6750455020973
+"Oromia","Dugda","All-N",-25.1599403665141
+"Oromia","Dugda","All-P",4.1783873296201
+"Oromia","Dugda","All-S",9.26397432117505
+"Oromia","Dugda","All-Zn",2.23955609311134
+"Oromia","Dugda","Control",-33.4301542969041
+"Oromia","Dugda","recNP+S2",10.1848318807285
+"Oromia","Ejere","All",0
+"Oromia","Ejere","All-B",0.524394732987954
+"Oromia","Ejere","All-K",5.46574988454173
+"Oromia","Ejere","All-KSZnB",-5.43278117865731
+"Oromia","Ejere","All-N",-49.9695282951539
+"Oromia","Ejere","All-P",-22.7841319752177
+"Oromia","Ejere","All-S",3.93626257107538
+"Oromia","Ejere","All-Zn",-4.15121679087258
+"Oromia","Ejere","Control",-65.5378690450535
+"Oromia","Ejere","recNP+S2",1.47728587973191
+"Oromia","Gemechis","All",0
+"Oromia","Gemechis","All-B",-9.64321581359788
+"Oromia","Gemechis","All-K",12.2879842140623
+"Oromia","Gemechis","All-KSZnB",2.96156426454227
+"Oromia","Gemechis","All-N",-6.73061922223655
+"Oromia","Gemechis","All-P",9.91709752252422
+"Oromia","Gemechis","All-S",4.99070246164262
+"Oromia","Gemechis","All-Zn",-4.88179221456004
+"Oromia","Gemechis","Control",-23.6822856045293
+"Oromia","Gemechis","recNP+S2",-3.53065313776198
+"Oromia","Ginir","All",0
+"Oromia","Ginir","All-B",-9.21788791311407
+"Oromia","Ginir","All-K",-1.79156190452985
+"Oromia","Ginir","All-KSZnB",-1.5355707453981
+"Oromia","Ginir","All-N",-12.871111448214
+"Oromia","Ginir","All-P",-11.7393757414944
+"Oromia","Ginir","All-S",-12.1686241555535
+"Oromia","Ginir","All-Zn",-6.24499923269303
+"Oromia","Ginir","Control",-26.049003098214
+"Oromia","Ginir","recNP+S2",-3.52860372352141
+"Oromia","Goba","All",0
+"Oromia","Goba","All-B",-7.96132202421207
+"Oromia","Goba","All-K",8.25126276763948
+"Oromia","Goba","All-KSZnB",1.28766570845819
+"Oromia","Goba","All-N",-8.47179895583458
+"Oromia","Goba","All-P",-0.205439403393077
+"Oromia","Goba","All-S",-2.59187681570407
+"Oromia","Goba","All-Zn",-0.32995343560393
+"Oromia","Goba","Control",-63.481512614839
+"Oromia","Goba","recNP+S2",-16.1199688172059
+"Oromia","Habro","All",0
+"Oromia","Habro","All-B",21.4784836254785
+"Oromia","Habro","All-K",-15.115958753435
+"Oromia","Habro","All-KSZnB",-3.39248600289875
+"Oromia","Habro","All-N",-36.6922328462901
+"Oromia","Habro","All-P",-17.1480107652507
+"Oromia","Habro","All-S",6.15357302736707
+"Oromia","Habro","All-Zn",16.3837154738627
+"Oromia","Habro","Control",-48.8480010165912
+"Oromia","Habro","recNP+S2",-7.92218362485308
+"Oromia","Horo","All",0
+"Oromia","Horo","All-B",-3.58564498586934
+"Oromia","Horo","All-K",-6.54901580998706
+"Oromia","Horo","All-KSZnB",-8.99083658135559
+"Oromia","Horo","All-N",-60.7134079003
+"Oromia","Horo","All-P",-27.5965402178687
+"Oromia","Horo","All-S",-4.2964904522292
+"Oromia","Horo","All-Zn",-3.26798604976037
+"Oromia","Horo","Control",-64.9726667502245
+"Oromia","Horo","recNP+S2",-3.12768583861118
+"Oromia","Jima Arjo","All",0
+"Oromia","Jima Arjo","All-B",17.3898893850946
+"Oromia","Jima Arjo","All-K",7.34514900124089
+"Oromia","Jima Arjo","All-KSZnB",-5.54455243352376
+"Oromia","Jima Arjo","All-N",-51.5236514506058
+"Oromia","Jima Arjo","All-P",-2.7473870285605
+"Oromia","Jima Arjo","All-S",16.4254382758322
+"Oromia","Jima Arjo","All-Zn",8.57359888839996
+"Oromia","Jima Arjo","Control",-60.336029387234
+"Oromia","Jima Arjo","recNP+S2",4.43918600838433
+"Oromia","Kersa","All",0
+"Oromia","Kersa","All-B",-8.95990795006006
+"Oromia","Kersa","All-K",-5.19415917002064
+"Oromia","Kersa","All-KSZnB",4.06878646518584
+"Oromia","Kersa","All-N",-35.0106610546997
+"Oromia","Kersa","All-P",-29.7415358196698
+"Oromia","Kersa","All-S",-2.91931374402544
+"Oromia","Kersa","All-Zn",4.18611280418771
+"Oromia","Kersa","Control",-47.5098013687629
+"Oromia","Kersa","recNP+S2",-0.381290434043286
+"Oromia","Liban Gamo","All",0
+"Oromia","Liban Gamo","All-B",-2.35547806535308
+"Oromia","Liban Gamo","All-K",1.55248303698315
+"Oromia","Liban Gamo","All-KSZnB",-5.16216506682267
+"Oromia","Liban Gamo","All-N",-51.0051886252468
+"Oromia","Liban Gamo","All-P",-19.4750521829516
+"Oromia","Liban Gamo","All-S",7.1677291138485
+"Oromia","Liban Gamo","All-Zn",-5.71968254561097
+"Oromia","Liban Gamo","Control",-60.7992689057236
+"Oromia","Liban Gamo","recNP+S2",-3.74591574509507
+"Oromia","Liban Jawi","All",0
+"Oromia","Liban Jawi","All-B",-1.56651490894348
+"Oromia","Liban Jawi","All-K",-0.599697820827622
+"Oromia","Liban Jawi","All-KSZnB",-6.17766051148759
+"Oromia","Liban Jawi","All-N",-62.6884829882606
+"Oromia","Liban Jawi","All-P",-38.3490855808247
+"Oromia","Liban Jawi","All-S",-0.758369706735717
+"Oromia","Liban Jawi","All-Zn",-0.0969679820226024
+"Oromia","Liban Jawi","Control",-70.9746437797682
+"Oromia","Liban Jawi","recNP+S2",2.23990884926128
+"Oromia","Lume","All",0
+"Oromia","Lume","All-B",3.50478620640548
+"Oromia","Lume","All-K",10.567196827181
+"Oromia","Lume","All-KSZnB",9.91044322522203
+"Oromia","Lume","All-N",-30.7703418160165
+"Oromia","Lume","All-P",1.91559714943866
+"Oromia","Lume","All-S",14.9582866871465
+"Oromia","Lume","All-Zn",2.23675925821648
+"Oromia","Lume","Control",-39.8622862629579
+"Oromia","Lume","recNP+S2",4.05854771661379
+"Oromia","Meta","All",0
+"Oromia","Meta","All-B",7.55054436432426
+"Oromia","Meta","All-K",-5.04286257920411
+"Oromia","Meta","All-KSZnB",-2.50399777555994
+"Oromia","Meta","All-N",-39.9116312375478
+"Oromia","Meta","All-P",-14.215811188491
+"Oromia","Meta","All-S",1.44415723824089
+"Oromia","Meta","All-Zn",-1.3179192354022
+"Oromia","Meta","Control",-44.0467600700138
+"Oromia","Meta","recNP+S2",-18.3715243340555
+"Oromia","Sinana","All",0
+"Oromia","Sinana","All-B",11.0603810611008
+"Oromia","Sinana","All-K",5.47298567018601
+"Oromia","Sinana","All-KSZnB",9.38468018027939
+"Oromia","Sinana","All-N",-22.1312167380425
+"Oromia","Sinana","All-P",-7.89129246560434
+"Oromia","Sinana","All-S",9.93058018956852
+"Oromia","Sinana","All-Zn",1.22166121378431
+"Oromia","Sinana","Control",-57.3576618362467
+"Oromia","Sinana","recNP+S2",7.2239029786188
+"Oromia","Tiyo","All",0
+"Oromia","Tiyo","All-B",0.907038505567783
+"Oromia","Tiyo","All-K",-0.0997854227273907
+"Oromia","Tiyo","All-KSZnB",-6.57134193583749
+"Oromia","Tiyo","All-N",-35.6847794952225
+"Oromia","Tiyo","All-P",-14.6754867782422
+"Oromia","Tiyo","All-S",-1.46416166576252
+"Oromia","Tiyo","All-Zn",-2.20060306697656
+"Oromia","Tiyo","Control",-51.5587568797997
+"Oromia","Tiyo","recNP+S2",-6.77421712785293
+"Oromia","Toke Kutaye","All",0
+"Oromia","Toke Kutaye","All-B",0.495714448477132
+"Oromia","Toke Kutaye","All-K",2.35006122014107
+"Oromia","Toke Kutaye","All-KSZnB",1.91736444488982
+"Oromia","Toke Kutaye","All-N",-43.0926036534927
+"Oromia","Toke Kutaye","All-P",-9.35630286308797
+"Oromia","Toke Kutaye","All-S",-2.25249084177625
+"Oromia","Toke Kutaye","All-Zn",-3.44474162830887
+"Oromia","Toke Kutaye","Control",-52.3265385845951
+"Oromia","Toke Kutaye","recNP+S2",-3.69409493113249
+"Oromia","Welmera","All",0
+"Oromia","Welmera","All-B",8.13993841249971
+"Oromia","Welmera","All-K",5.26981709994073
+"Oromia","Welmera","All-KSZnB",-2.41141472574962
+"Oromia","Welmera","All-N",-43.3980547234699
+"Oromia","Welmera","All-P",-12.2622488509433
+"Oromia","Welmera","All-S",12.7057896741656
+"Oromia","Welmera","All-Zn",12.4690041024899
+"Oromia","Welmera","Control",-64.3719815727588
+"Oromia","Welmera","recNP+S2",7.10222599426829
+"Oromia","Yayagul","All",0
+"Oromia","Yayagul","All-B",3.4359145653495
+"Oromia","Yayagul","All-K",-4.98998147662207
+"Oromia","Yayagul","All-KSZnB",8.42011501424816
+"Oromia","Yayagul","All-N",-21.2783090228252
+"Oromia","Yayagul","All-P",-14.6142713176486
+"Oromia","Yayagul","All-S",0.536664259920732
+"Oromia","Yayagul","All-Zn",-3.20460646633099
+"Oromia","Yayagul","Control",-46.0731827672966
+"Oromia","Yayagul","recNP+S2",2.70782834761884
+"SNNPR","Adiyo","All",0
+"SNNPR","Adiyo","All-B",0.697929374774296
+"SNNPR","Adiyo","All-K",0.217953901111593
+"SNNPR","Adiyo","All-KSZnB",-5.9889427239481
+"SNNPR","Adiyo","All-N",-26.2572016099239
+"SNNPR","Adiyo","All-P",-20.6194418076216
+"SNNPR","Adiyo","All-S",0.992405659112124
+"SNNPR","Adiyo","All-Zn",3.50701624105112
+"SNNPR","Adiyo","Control",-42.8530560557817
+"SNNPR","Adiyo","recNP+S2",-7.60354025011435
+"SNNPR","Angecha","All",0
+"SNNPR","Angecha","All-B",-1.74805707558602
+"SNNPR","Angecha","All-K",-5.4307571532205
+"SNNPR","Angecha","All-KSZnB",-3.80124722237757
+"SNNPR","Angecha","All-N",-32.213092750518
+"SNNPR","Angecha","All-P",-7.92022014375895
+"SNNPR","Angecha","All-S",-2.72689037395969
+"SNNPR","Angecha","All-Zn",-1.65565071889441
+"SNNPR","Angecha","Control",-35.6868050688016
+"SNNPR","Angecha","recNP+S2",-5.9077539470464
+"SNNPR","Anilemo","All",0
+"SNNPR","Anilemo","All-K",-6.98603214796473
+"SNNPR","Anilemo","All-KSZnB",-1.40289082907512
+"SNNPR","Anilemo","Control",-38.0651652910974
+"SNNPR","Debub Ari","All",0
+"SNNPR","Debub Ari","All-B",6.64606873303648
+"SNNPR","Debub Ari","All-K",3.5459122241371
+"SNNPR","Debub Ari","All-KSZnB",7.46778667750725
+"SNNPR","Debub Ari","All-N",-32.9418345807792
+"SNNPR","Debub Ari","All-P",-5.63221004205109
+"SNNPR","Debub Ari","All-S",6.76983240768601
+"SNNPR","Debub Ari","All-Zn",3.56231996741673
+"SNNPR","Debub Ari","Control",-43.5764298685381
+"SNNPR","Debub Ari","recNP+S2",8.05786564007419
+"SNNPR","Doyogena","All",0
+"SNNPR","Doyogena","All-B",5.7731921679664
+"SNNPR","Doyogena","All-K",5.93632640773647
+"SNNPR","Doyogena","All-KSZnB",7.13468351606234
+"SNNPR","Doyogena","All-N",-34.8461178853311
+"SNNPR","Doyogena","All-P",-0.822710326473993
+"SNNPR","Doyogena","All-S",-1.97345768446137
+"SNNPR","Doyogena","All-Zn",-0.187522975933885
+"SNNPR","Doyogena","Control",-35.6082718194551
+"SNNPR","Doyogena","recNP+S2",-3.15535968365255
+"SNNPR","Lemo","All",0
+"SNNPR","Lemo","All-K",-2.30583306103212
+"SNNPR","Lemo","All-KSZnB",2.9724225219844
+"SNNPR","Lemo","Control",-47.8699405804721
+"SNNPR","Sankura","All",0
+"SNNPR","Sankura","All-B",48.2129556791569
+"SNNPR","Sankura","All-K",33.0297647881648
+"SNNPR","Sankura","All-KSZnB",39.3523490438355
+"SNNPR","Sankura","All-N",-8.76616664204222
+"SNNPR","Sankura","All-P",14.700694834147
+"SNNPR","Sankura","All-S",41.7350926975492
+"SNNPR","Sankura","All-Zn",38.8364842894139
+"SNNPR","Sankura","Control",-17.0859252370453
+"SNNPR","Sankura","recNP+S2",32.4616290284134
+"SNNPR","Soro","All",0
+"SNNPR","Soro","All-K",3.94758826802112
+"SNNPR","Soro","All-KSZnB",1.45990749214417
+"SNNPR","Soro","Control",-66.2906844712371
+"SNNPR","Wera Dijo","All",0
+"SNNPR","Wera Dijo","All-B",-0.697377131458253
+"SNNPR","Wera Dijo","All-K",-5.13558815216883
+"SNNPR","Wera Dijo","All-KSZnB",-5.30403982572219
+"SNNPR","Wera Dijo","All-N",-35.2935173732949
+"SNNPR","Wera Dijo","All-P",-16.0017236243076
+"SNNPR","Wera Dijo","All-S",-2.27009355161888
+"SNNPR","Wera Dijo","All-Zn",-5.45488727290512
+"SNNPR","Wera Dijo","Control",-40.4990875870298
+"SNNPR","Wera Dijo","recNP+S2",-5.84220405471889

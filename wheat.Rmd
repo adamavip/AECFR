@@ -16,11 +16,20 @@ library(skimr)
 library(gtsummary)
 library(inspectdf)
 library(sf)
+library(tidymodels) # ML using tidyverse principles
+library(doParallel) # parallel computing
+library(recipeselectors) # feature selection
+tidymodels_prefer() # handle conflicts between tidymodels and other package
+library(bestNormalize) # best normalizing transformation
+library(vip) # MLinterpretation
+library(DALEX) # MLinterpretation
+library(DALEXtra) # MLinterpretation
+library(caret) # ML algos
 ```
 
 ## Import data
 ```{r}
-df<- readxl::read_excel("input/maize.xls",sheet = "MaizeDec7-2023_final_no_IFDC")
+df<- readxl::read_excel("input/Wheat_covariates.xls")
 ```
 
 ## Overview of the data
@@ -31,11 +40,11 @@ str(df)
 ```{r}
 # Rename some variables
 df<- df %>% rename_with(
-   ~ c("all_tr1","recNP_tr8","diff_all","diff_recNP"),.cols= c("All (Trt1)","RecNP (Trt8)", "Yld. diff-All (%)", "Yld. diff-RecNP (%)"))
+   ~ c("recNP_diff","all_diff"),.cols= c("RNP_Per_Yield_diff", "All_Per_Yield_diff"))
 
 # Convert to numeric
-df <- df %>% mutate(across(c("GYld_Kgpha","all_tr1","recNP_tr8"),
-                           as.numeric))
+#df <- df %>% mutate(across(c("GYld_Kgpha","all_tr1","recNP_tr8"),
+                           #as.numeric))
 ```
 
 ## Inspect data
@@ -44,7 +53,7 @@ df <- df %>% mutate(across(c("GYld_Kgpha","all_tr1","recNP_tr8"),
 df %>% select_if(is.character) %>% skim()
 ```
 ```{r}
-df %>% inspect_cat()
+df %>% select(Region, District, Farmer_name,Soil_table) %>%  inspect_cat()
 ```
 
 
@@ -56,26 +65,30 @@ df %>% select_if(is.numeric) %>% skim() %>%
 
 
 ## Descriptive statistics
-* Yield per treatment
+* Yield per Trtment
 ```{r message=FALSE, warning=FALSE}
-df %>% select(c("Treat","GYld_Kgpha")) %>% 
+df %>% select(c("Trt","AGY")) %>% 
   tbl_summary(
-    by = Treat,
+    by = Trt,
     statistic = list(
       all_continuous() ~ "{mean} ({sd})",
       all_categorical() ~ "{n} / {N} ({p}%)"
     ),
     digits = all_continuous() ~ 2,
     missing_text = "(Missing)"
-  ) %>% modify_spanning_header(all_stat_cols() ~ "**Treatments**") 
+  ) %>% modify_spanning_header(all_stat_cols() ~ "**Trtments**") %>% add_p()
 ```
 
 ## Explory data analysis
 * Map
 ```{r}
-maize_areas<- st_as_sf(df %>% select(c("Lat_DD","Long_DD",
-                                      "Treat","GYld_Kgpha","Region")) %>% drop_na() %>% filter(GYld_Kgpha>0,Treat==9),
-                        coords=c("Long_DD","Lat_DD"), crs=4326)
+wheat_areas<-df %>% select(c("Lat_DD","Lon_DD",
+    "Trt","AGY","Farmer_name")) %>% drop_na() %>% filter(AGY>0) %>% group_by(Farmer_name) %>% 
+  summarise(Lon=mean(Lon_DD),Lat=mean(Lat_DD),
+            AGY=mean(AGY))
+
+wheat_areas<- st_as_sf(wheat_areas,
+                        coords=c("Lon","Lat"), crs=4326)
 
 
 # Loxgb Ethiopia shapefile
@@ -88,10 +101,11 @@ p<-ggplot() +
   geom_sf(data = Eth, fill = NA, color = "black") +
   geom_sf(data = Eth_regions, fill = NA, color = "darkgrey")+
   #geom_sf_label(data = Eth_regions,aes(label=ADM1_EN))+
-   geom_sf(data=maize_areas,aes(color=Region,size=GYld_Kgpha), na.rm=T) +
+   geom_sf(data=wheat_areas,aes(color=AGY), na.rm=T) +
+  scale_color_gradient2(low = "blue",high = "red")+
   coord_sf()+
   theme_bw()
-ggsave(p, file="output/Eth_maize_yield_map.png", width = 6, height = 4, dpi = 300)
+ggsave(p, file="output/wheat/Eth_wheat_yield_map.png", width = 6, height = 4, dpi = 300)
 p
 ```
 ```{r}
@@ -103,15 +117,34 @@ tm_shape(Eth)+
   tm_borders(col = "black") +
 tm_shape(Eth_regions) +
   tm_borders(col = "gray")
-tm_shape(maize_areas)+
-  tm_dots(col = "GYld_Kgpha") +
+tm_shape(wheat_areas)+
+  tm_dots(col = "AGY") +
   tm_mouse_coordinates()
 ```
 
 * Yield boxplots
 ```{r}
-df %>% drop_na(GYld_Kgpha) %>% 
-  ggplot(aes(factor(Treat),GYld_Kgpha, fill=factor(Treat)))+
+# Recode Trtment
+df$Trt<- factor(df$Trt)
+df<-df %>% mutate(Trt=case_when(
+  Trt=="1" ~ "All",
+  Trt=="2" ~ "All-B",
+  Trt=="3" ~ "All-Zn",
+  Trt=="4" ~ "All-S",
+  Trt=="5" ~ "All-K",
+  Trt=="6" ~ "All-P",
+  Trt=="7" ~ "All-N",
+  Trt=="8" ~ "All-KSZnB",
+  Trt=="9" ~ "Control",
+  Trt=="10" ~ "recNP+S2",
+))
+
+```
+
+
+```{r}
+p_agy<-df %>% drop_na(AGY) %>% 
+  ggplot(aes(factor(Trt),AGY, fill=factor(Trt)))+
   geom_boxplot() +
   stat_summary(fun = mean, geom = "point", shape = 21, size = 2, color = "white",fill="blue")+
   theme_bw() +
@@ -120,6 +153,148 @@ df %>% drop_na(GYld_Kgpha) %>%
         axis.title.x = element_text(size = 15),
         legend.position = 'none') +
   labs(y="Grain Yield (kg/ha)",x="Treatments")
+p_agy
+ggsave(p_agy, file="output/wheat/AGY_national.png", width = 6, height = 4, dpi = 300)
+```
+
+
+* Yield boxplots per soil type
+```{r}
+p_agy_stp<-df %>% drop_na(AGY) %>% 
+  ggplot(aes(factor(Trt),AGY, fill=factor(Trt)))+
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 1, color = "white",fill="blue")+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=90,size = 8), 
+        axis.title.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        legend.position = 'none') +
+  labs(y="Grain Yield (kg/ha)",x="Treatments")+
+  facet_wrap(~Soil_table)
+p_agy_stp
+ggsave(p_agy_stp, file="output/wheat/AGY_national_stp.png", width = 8, height = 6, dpi = 300)
+```
+* Yield boxplots per moisture domain
+```{r}
+p_agy_MD<-df %>% drop_na(AGY) %>% 
+  ggplot(aes(factor(Trt),AGY, fill=factor(Trt)))+
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 1, color = "white",fill="blue")+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=90,size = 8), 
+        axis.title.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        legend.position = 'none') +
+  labs(y="Grain Yield (kg/ha)",x="Treatments")+
+  facet_wrap(~MD)
+p_agy_MD
+ggsave(p_agy_MD, file="output/wheat/AGY_national_MD.png", width = 8, height = 6, dpi = 300)
+```
+
+*  Biomass boxplots
+```{r}
+df$ABY<- df$ABY * 1000
+```
+
+```{r}
+p_aby<-df %>% drop_na(ABY) %>% filter(ABY<25000) %>% 
+  ggplot(aes(factor(Trt),ABY, fill=factor(Trt)))+
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 2, color = "white",fill="blue")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), 
+        axis.title.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        legend.position = 'none') +
+  labs(y="Biomass (kg/ha)",x="Treatments")
+p_aby
+ggsave(p_aby, file="output/wheat/ABY_national.png", width = 6, height = 4, dpi = 300)
+```
+
+* Biomass boxplots per soil type
+```{r}
+p_aby_stp<-df %>% drop_na(ABY) %>% filter(ABY<25000) %>% 
+  ggplot(aes(factor(Trt),ABY, fill=factor(Trt)))+
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 1, color = "white",fill="blue")+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=90,size = 6), 
+        axis.title.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        legend.position = 'none') +
+  labs(y="Biomass (kg/ha)",x="Treatments")+
+  facet_wrap(~Soil_table)
+p_aby_stp
+ggsave(p_aby_stp, file="output/wheat/ABY_national_stp.png", width = 8, height = 6, dpi = 300)
+```
+
+* Biomass boxplots per moisture domain
+```{r}
+p_aby_MD<-df %>% drop_na(ABY) %>% filter(ABY<25000) %>% 
+  ggplot(aes(factor(Trt),ABY, fill=factor(Trt)))+
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 1, color = "white",fill="blue")+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=90,size = 8), 
+        axis.title.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        legend.position = 'none') +
+  labs(y="Biomass (kg/ha)",x="Treatments")+
+  facet_wrap(~MD)
+p_aby_MD
+ggsave(p_aby_MD, file="output/wheat/ABY_national_MD.png", width = 8, height = 6, dpi = 300)
+```
+
+
+*  HI boxplots
+
+```{r}
+p_hi<-df %>% drop_na(HI)  %>% 
+  ggplot(aes(factor(Trt),HI, fill=factor(Trt)))+
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 2, color = "white",fill="blue")+
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 10), 
+        axis.title.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        legend.position = 'none') +
+  labs(y="HI",x="Treatments")
+p_hi
+ggsave(p_hi, file="output/wheat/HI_national.png", width = 6, height = 4, dpi = 300)
+```
+
+* HI boxplots per soil type
+```{r}
+p_hi_stp<-df %>% drop_na(HI)  %>% 
+  ggplot(aes(factor(Trt),HI, fill=factor(Trt)))+
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 1, color = "white",fill="blue")+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=90,size = 6), 
+        axis.title.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        legend.position = 'none') +
+  labs(y="HI",x="Treatments")+
+  facet_wrap(~Soil_table)
+p_hi_stp
+ggsave(p_hi_stp, file="output/wheat/HI_national_stp.png", width = 8, height = 6, dpi = 300)
+```
+
+* HI boxplots per moisture domain
+```{r}
+p_hi_MD<-df %>% drop_na(HI)  %>% 
+  ggplot(aes(factor(Trt),HI, fill=factor(Trt)))+
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 21, size = 1, color = "white",fill="blue")+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=90,size = 8), 
+        axis.title.y = element_text(size = 15),
+        axis.title.x = element_text(size = 15),
+        legend.position = 'none') +
+  labs(y="HI",x="Treatments")+
+  facet_wrap(~MD)
+p_hi_MD
+ggsave(p_hi_MD, file="output/wheat/HI_national_MD.png", width = 8, height = 6, dpi = 300)
 ```
 
 ## Analysis of Variance (ANOVA)
@@ -127,14 +302,355 @@ df %>% drop_na(GYld_Kgpha) %>%
 Let's check the assumption
 ```{r}
 # Homogeinty of variance
-bartlett.test(GYld_Kgpha ~ Treat, data = df)
+bartlett.test(AGY ~ Trt, data = df)
 ```
-p<0.05 so we can accept the alternative hypothesis which stipulate there are significant differences of variances accross treatments.
 
-* Robust ANOVA
 ```{r}
+
 # Perform robust ANOVA using Welch's test
-welch_result <- oneway.test(GYld_Kgpha ~ Treat, data = df, var.equal = FALSE)
-print(welch_result)
+oneway.test(all_diff ~ Region, data = df, var.equal = FALSE)
 ```
-p of the treatment is statistically significant (p < 0.05), it is likely that treatment type does have a significant effect on average crop yield. In fact there is statistically-significant difference in average crop yield according to treatment.
+```{r}
+# mean differences accross regions and soil type?
+df["Region.Soil"]=interaction(df$Region,df$Soil_table)
+oneway.test(AGY ~ Region.Soil, data = df, var.equal = FALSE)
+```
+
+## Exploration yield penality 
+
+### Yield differences with all
+
+* National level
+```{r}
+all_nat<- df %>% group_by(Trt) %>%
+summarise(mean_diff_all=mean(all_diff,na.rm = T)) %>% drop_na()
+all_nat
+write.csv(all_nat,"output/wheat/all_diff_nat.csv", row.names = F)
+```
+```{r}
+colors<-c("#bdc9e1","#cb181d","#bae4b3","#969696","#df65b0",
+          "#6a51a3","#fecc5c","#d7b5d8","#525252","#238b45")
+p_nat_all<- all_nat %>%
+ggplot(aes(x=mean_diff_all,y=Trt,fill=Trt)) +
+geom_col(width = 0.5)+
+  scale_fill_manual(values = colors)+
+  #scale_y_discrete(breaks = seq(0, 25, by = 5))+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.6)+
+theme_bw()+
+  labs(x="Average Yield Penalty [all] (%)",fill="Treatment",
+       y="")
+p_nat_all
+ggsave(p_nat_all, file="output/wheat/yield_diff_all_national.png", width = 6, height = 4, dpi = 300)
+```
+
+* National level per soil
+```{r}
+all_nat_soil_table<- df %>% group_by(Soil_table,Trt) %>%
+summarise(mean_diff_all=mean(all_diff,na.rm = T)) %>% drop_na()
+all_nat_soil_table
+write.csv(all_nat_soil_table,"output/wheat/all_diff_nat_soil_table.csv", row.names = F)
+```
+```{r}
+colors<-c("#bdc9e1","#cb181d","#bae4b3","#969696","#df65b0",
+          "#6a51a3","#fecc5c","#d7b5d8","#525252","#238b45")
+p_all_nat_soil_table<- all_nat_soil_table %>%
+ggplot(aes(x=mean_diff_all,y=Trt,fill=Trt)) +
+geom_col(width = 0.5)+
+  scale_fill_manual(values = colors)+
+  #scale_y_discrete(breaks = seq(0, 25, by = 5))+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.6)+
+theme_bw()+
+  labs(x=" Average yield penalty [all] (%)",fill="Treatment",y="")+
+  facet_wrap(~Soil_table) +
+  theme(axis.text.y = element_text(size = 4))
+p_all_nat_soil_table
+ggsave(p_all_nat_soil_table, file="output/wheat/yield_diff_all_national_soil_table.png", width = 6, height = 4, dpi = 300)
+```
+* National level per moisture domain
+```{r}
+all_nat_MD<- df %>% group_by(MD,Trt) %>%
+summarise(mean_diff_all=mean(all_diff,na.rm = T)) %>% drop_na()
+all_nat_MD
+write.csv(all_nat_MD,"output/wheat/all_diff_nat_MD.csv", row.names = F)
+```
+```{r}
+colors<-c("#bdc9e1","#cb181d","#bae4b3","#969696","#df65b0",
+          "#6a51a3","#fecc5c","#d7b5d8","#525252","#238b45")
+p_all_nat_MD<- all_nat_MD %>%
+ggplot(aes(x=mean_diff_all,y=Trt,fill=Trt)) +
+geom_col(width = 0.5)+
+  scale_fill_manual(values = colors)+
+  #scale_y_discrete(breaks = seq(0, 25, by = 5))+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.6)+
+theme_bw()+
+  labs(x=" Average yield penalty [all] (%)",fill="Treatment",y="")+
+  facet_wrap(~MD) +
+  theme(axis.text.y = element_text(size = 8))
+p_all_nat_MD
+ggsave(p_all_nat_MD, file="output/wheat/yield_diff_all_national_MD.png", width = 6, height = 4, dpi = 300)
+```
+
+
+
+
+* Per region
+```{r message=TRUE, warning=FALSE}
+all_reg<-df %>% group_by(Region,Trt) %>%
+summarise(mean_diff_all=mean(all_diff,na.rm = T)) %>% drop_na()
+write.csv(all_reg,"output/wheat/all_diff_reg.csv", row.names = F)
+```
+```{r}
+colors<-c("#bdc9e1","#cb181d","#bae4b3","#969696","#df65b0",
+          "#6a51a3","#fecc5c","#d7b5d8","#525252","#238b45")
+p_reg<- all_reg %>%
+ggplot(aes(x=mean_diff_all,y=Region,fill=Trt)) +
+geom_col(width = 0.5)+
+  scale_fill_manual(values = colors)+
+  #scale_y_discrete(breaks = seq(0, 25, by = 5))+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.6)+
+theme_bw()+
+  labs(x="Average Yield Penalty [all] (%)",y="Region")
+p_reg
+ggsave(p_reg, file="output/wheat/yield_diff_all_region.png", width = 6, height = 4, dpi = 300)
+```
+
+
+* Per region and soil type
+```{r}
+#df<- df %>% drop_na(Soil_table)
+all_reg_soil_table<-df %>% group_by(Region,Soil_table,Trt) %>%
+summarise(mean_diff_all=mean(all_diff,na.rm = T)) 
+all_reg_soil_table
+write.csv(all_reg_soil_table,"output/wheat/all_diff_reg_soil_table.csv", row.names = F)
+```
+```{r}
+p_reg_soil_table<-all_reg_soil_table %>%
+ggplot(aes(x=mean_diff_all,y=Region,fill=Trt)) +
+geom_col()+
+scale_fill_manual(values = colors)+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.6)+
+theme_bw()+
+  labs(x="Average Yield Penalty [all] (%)",y="Region") +
+  facet_wrap(~Soil_table)
+p_reg_soil_table
+ggsave(p_reg_soil_table, file="output/wheat/yield_diff_all_region_soil_table.png", width = 8, height = 6, dpi = 300)
+```
+
+* Per region and moisture domain
+```{r}
+#df<- df %>% drop_na(MD)
+all_reg_md<-df %>% group_by(Region,MD,Trt) %>%
+summarise(mean_diff_all=mean(all_diff,na.rm = T)) 
+all_reg_md
+write.csv(all_reg_md,"output/wheat/all_diff_reg_md.csv", row.names = F)
+```
+```{r}
+p_reg_md<-all_reg_md %>%
+ggplot(aes(x=mean_diff_all,y=Region,fill=Trt)) +
+geom_col(width = 0.5)+
+scale_fill_manual(values = colors)+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.6)+
+theme_bw()+
+  labs(x="Average Yield Penalty [all] (%)",y="Region") +
+  facet_wrap(~MD)
+p_reg_md
+ggsave(p_reg_md, file="output/wheat/all_diff_region_md.png", width = 8, height = 6, dpi = 300)
+```
+
+
+
+* Per region and district
+```{r}
+#df<- df %>% drop_na(Soil_table)
+all_reg_district<-df %>% group_by(Region,District,Trt) %>%
+summarise(mean_diff_all=mean(all_diff,na.rm = T)) 
+all_reg_district
+write.csv(all_reg_district,"output/wheat/all_diff_reg_district.csv", row.names = F)
+```
+```{r}
+p_reg_district<-all_reg_district %>% filter(District !="Sankura") %>% 
+ggplot(aes(x=mean_diff_all,y=District,fill=Trt)) +
+geom_col()+
+scale_fill_manual(values = colors)+
+geom_vline(xintercept = 0, linetype = "dashed", color = "red", size = 0.6)+
+theme_bw()+
+  labs(x="Average Yield Penalty [all] (%)",y="Region",
+       fill="Treatment") +
+  facet_wrap(~Region)+
+  theme(axis.text.y = element_text(size=4),
+        legend.text = element_text(size=6))
+p_reg_district
+ggsave(p_reg_district, file="output/wheat/yield_diff_all_region_district.png", width = 8, height = 6, dpi = 300)
+```
+## ML modeling
+* Load data
+```{r}
+# Read data
+dfcov<- readxl::read_excel("input/wheat_ydiff_covariates.xls", sheet = "Cleaned")
+```
+
+* Select yield and covariates
+```{r}
+dfcov<- dfcov %>% select("All_Yield_diff":"Mo_rf")
+```
+
+* Check the yield distribution
+```{r}
+p<-ggplot(dfcov, aes(All_Yield_diff)) +
+  geom_histogram(fill="#ffa500",color="white") +
+  theme_bw()+
+  labs(x="Grain Yield Difference [all](kg/ha)")
+ggsave(p, file="output/wheat/Eth_wheat_hist.png", width = 4, height = 3, dpi = 300)
+p
+```
+
+* Preprocessing
+```{r}
+# Split data to create partitions
+#3df<- df %>% select(-c(nfert_kgha,seed_rate_kgha))
+df_split <- initial_split(dfcov, prop = 0.8)
+df_train <- training(df_split)
+df_test <- testing(df_split)
+```
+
+Let's build a recipe
+```{r message=FALSE, warning=FALSE}
+recipe <- recipe(All_Yield_diff ~ ., data = df_train) %>% # filtering
+  #step_naomit() %>% 
+  # Apply Yeo-Johnson transformation for left-skewed yield data
+  #step_YeoJohnson(cc_yield_kgha) %>% 
+  # Convert string to factor
+  #step_string2factor(all_nominal()) %>%
+  # remove no variance predictors which provide no predictive information 
+  #recipes::step_nzv(all_nominal()) %>%
+  # Encode factor as dummy variables
+  #step_dummy(all_nominal(),one_hot = T) %>%
+  #step_lencode_mixed(all_nominal(), outcome=vars(cc_yield_kgha)) %>% 
+  # Replace na values by mean
+  step_impute_mean(all_predictors(),all_outcomes()) %>% 
+  # Remove non-variance variables
+  step_nzv(where(is.numeric)) %>%
+  # Normalize numeric variables
+  step_orderNorm(all_numeric_predictors()) %>%
+  step_normalize(all_numeric_predictors()) %>%
+  # remove any linear combinations
+  #step_pca(all_predictors(), threshold = .9) %>% 
+  prep()
+```
+
+```{r}
+recipe %>% juice() %>% dim()
+```
+
+* Recursive feature elimination
+```{r}
+registerDoParallel() # Enable distributed computation
+train_set <- juice(recipe)
+test_set <- bake(recipe, new_data = df_test)
+# define five-fold cross-validation scheme
+control_feature <- rfeControl(functions=rfFuncs, method="cv", number=5)
+#
+# recursive feature elimination; 'sizes' stands for the number of variables
+x=train_set|>select(-All_Yield_diff)
+y=train_set$All_Yield_diff
+feature_selection <- rfe(x=x,y=y,sizes = c(1:28), rfeControl=control_feature)
+#
+# rmse vs. number of variables (ordered from very to not important)
+trellis.par.set(caretTheme())
+plot(feature_selection, type = c("g", "o"))
+#ggsave(file="output/rmse_rfe.png",plot = last_plot(), width = 5, height = 4, dpi = 300)
+
+
+```
+```{r}
+r2_vals<- as_tibble(feature_selection$results$Rsquared) %>% mutate(Variables=row_number())
+mx<- max(r2_vals$value)
+idx_mx<- which(r2_vals==mx)
+p<-ggplot(data=r2_vals, aes(Variables,y=value)) + 
+  geom_line()+
+  geom_point(fill="white", color="blue",size=2, alpha=0.5) +
+  geom_point(aes(x=idx_mx,y=mx),color="red",size=2)+
+  theme_bw() +
+  labs(y="R2 (Cross-Validation)")
+ggsave(p,file="output/r2_rfe.png", width = 5, height = 4, dpi = 300)
+p
+
+```
+
+```{r}
+# list all variables
+list_of_var <- feature_selection$optVariables
+list_of_var <- append("cc_yield_kgha", list_of_var)
+#
+# select 10 most important variables only
+train_data <- train_set[,list_of_var]
+test_data <- test_set[,list_of_var]
+```
+
+* Define models
+```{r}
+# Random forest
+rf_spec <- rand_forest(
+  trees = tune(),
+  mtry = tune(),
+  min_n = tune()
+) %>%
+  set_engine("ranger", importance = "impurity") %>%
+  set_mode("regression")
+rf_grid<- grid_regular(
+  mtry(c(4,12)), 
+  trees(),
+ min_n(),
+ levels = 8
+)
+
+
+# eXtreme Grxgbient Boost
+xgb_spec <- boost_tree(
+  trees = tune(),
+  mtry = tune(),
+  learn_rate = tune()
+) %>%
+  set_engine("xgboost", importance="permutation") %>%
+  set_mode("regression")
+xgb_grid<- grid_regular(
+  mtry(c(4,12)), 
+  trees(),
+ learn_rate(),
+ levels = 8
+)
+```
+
+* Define resampling and metrics
+```{r}
+cv <- vfold_cv(juice(recipe), v = 5)
+set.seed(6735)
+#cv <- vfold_cv(juice(prep(recipe_wf)), v = 5)
+#cv <- vfold_cv(train_data, v = 5)
+metrics <- metric_set(rmse,rsq)
+```
+
+* Train and evaluate the models
+
+```{r}
+registerDoParallel() # Enable distributed computation
+# RF
+rf_res <- tune_grid(
+  rf_spec,
+  All_Yield_diff ~ .,
+  cv,
+  metrics = metrics,
+  grid=rf_grid)
+
+rf_res %>%
+  collect_metrics()
+```
+
+```{r}
+rf_res %>%
+  tune::show_best(metric = "rsq") %>%
+  knitr::kable()
+```
+```{r}
+rf_res %>% autoplot()
+```
